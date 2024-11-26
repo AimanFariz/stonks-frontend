@@ -28,11 +28,12 @@ const AutoMemeGenerator = () => {
     if (allFiles.length > 0) {
       // Randomly select a meme from the collected files
       const randomImage = allFiles[Math.floor(Math.random() * allFiles.length)];
-
       // Use the file ID to construct the direct URL
       // const imageUrl = `http://localhost:4000/proxy-image?id=${randomImage.id}`;
-      const imageUrl = `/api/proxy-image?id=${randomImage.id}`;
+    //   const imageUrl = `https://stonks-backend-sandy.vercel.app/api/proxy-image?id=${randomImage.id}`;
+      const imageUrl = `https://stonks-backend-sandy.vercel.app/api/proxy-image?id=${randomImage.id}&t=${new Date().getTime()}`;
 
+      console.log(imageUrl)
       const caption = `When "${keywords.join(', ')}" happens...`;
 
       // Set meme from Google Drive
@@ -133,14 +134,14 @@ const AutoMemeGenerator = () => {
       </button>
       {generatedMeme && (
         <div className="mt-4 flex justify-center flex-col border border-red-600">
-          <img src={generatedMeme.url} alt="Generated Meme" className="m-auto" height={200} width={500}/>
+          <img src={generatedMeme.url} alt="Generated Meme" className="m-auto" height={200} width={500} onError={() => console.log("Failed to load image")}/>
           <p className="text-center mt-2 font-bold">{generatedMeme.text}</p>
           <p className="text-center text-sm">Source: {generatedMeme.source === "drive" ? "Yo mama" : "some random public APIs"}</p>
         </div>
       )}
       <div className="text-center mt-4">
         <p className="text-lg font-semibold">Brainrot Meter: {memeCount}</p>
-        <Line percent={memeCount} strokeWidth={2} strokeColor="#D3D3D3" />
+        <Line percent={memeCount} strokeWidth={1} strokeColor="#D3D3D3" />
         <p className="text-sm text-gray-600">
           Status: {getBrainrotLabel(memeCount)}
         </p>
