@@ -45,6 +45,7 @@ const AutoMemeGenerator = () => {
     } else {
       console.log("No matching image found.");
     }
+    setInput("")
   };
 
   // Fetch memes from the external API (e.g., Imgflip)
