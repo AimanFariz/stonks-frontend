@@ -56,14 +56,54 @@ const AutoMemeGenerator = () => {
     setLoading(false); // End loading
     setInput("");
   };
-
+  function showFlyingText(text) {
+    const container = document.getElementById('flying-text-container');
+    const flyingText = document.createElement('div');
+  
+    // Set text content and styles
+    flyingText.textContent = text;
+    flyingText.style.position = 'absolute';
+    flyingText.style.color = `hsl(${Math.random() * 360}, 100%, 50%)`; // Random color
+    flyingText.style.fontSize = `${Math.random() * 20 + 20}px`; // Random font size
+    flyingText.style.fontWeight = 'bold';
+    flyingText.style.zIndex = '1000';
+  
+    // Random start position
+    const startX = Math.random() * window.innerWidth;
+    const startY = Math.random() * window.innerHeight;
+    flyingText.style.left = `${startX}px`;
+    flyingText.style.top = `${startY}px`;
+  
+    // Append to container
+    container.appendChild(flyingText);
+  
+    // Animate the text
+    const animationDuration = 1000; // 1 second
+    flyingText.animate(
+      [
+        { transform: 'translateY(0)', opacity: 1 },
+        { transform: 'translateY(-100px)', opacity: 0 },
+      ],
+      {
+        duration: animationDuration,
+        easing: 'ease-out',
+      }
+    );
+  
+    // Remove text after animation
+    setTimeout(() => {
+      container.removeChild(flyingText);
+    }, animationDuration);
+  }
+  
   const fetchMeme = async () => {
     const inputWords = input.trim().split(/\s+/);
     if (inputWords.length === 0) {
       alert("Please enter a valid keyword");
       return;
     } else {
-      alert(`${memeCount - 1} iq points`);
+      // alert(`${memeCount - 1} iq points`);
+      showFlyingText(`${memeCount - 1} iq points`)
     }
 
     fetchMemesFromDrive(inputWords);
@@ -110,13 +150,13 @@ const AutoMemeGenerator = () => {
           "Just got dumped by the love of your life? "
         ]}
         loop={false}
-        // cursor
-        // cursorStyle='|'
+        cursor
+        cursorStyle='☝️🤓'
         typeSpeed={20}
         deleteSpeed={40}
         delaySpeed={2000}
         />
-        There will always be a meme for that.
+         There will always be a meme for that.
       </span>
       </div>
       
@@ -162,7 +202,7 @@ const AutoMemeGenerator = () => {
         </div>
       )}
 
-      <div>
+      <div id="flying-text-container">
         <p className="text-lg p-5 font-semibold text-white">IQ Points: {memeCount}</p>
         <div style={{ width: "300px", margin: "0 auto" }}>
         <Line percent={Math.abs(memeCount)} strokeWidth={1} strokeColor="#3b82f6"
@@ -184,7 +224,7 @@ const AutoMemeGenerator = () => {
       </div>
       <footer className="p-20 flex flex-col justify-end items-center h-full">
         <p className="">Empowering 𝓯𝓻𝓮𝓪𝓴𝔂𝓷𝓮𝓼𝓼 👅 on <span className='font-mono'>teh interwebz</span>, one brainrot at a time.</p>
-        <p>Made during a very chilly and lonely school break in 2024 by <a target="_blank" href='https://www.instagram.com/aimanfz05/' className='underline'>The Rizzler himself</a></p>
+        <p>Made during a very chilly and lonely Thanksgiving break in 2024 by <a target="_blank" href='https://www.instagram.com/aimanfz05/' className='underline'>The Rizzler himself</a></p>
       </footer>
 <p className="italic text-xs py-2">Disclaimer: The purpose of this website is to spread positivity and for fun. If you find any memes offensive, it ain't my problem that you're soft. just suck it up, say womp womp, and move on.</p>
 
