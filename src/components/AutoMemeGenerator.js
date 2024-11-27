@@ -138,8 +138,10 @@ const AutoMemeGenerator = () => {
         return "Certified Yapper";
       case count >= -25:
         return "If u produced this much, just put the fries in the bag lil bro 😭";
+      case count >= -40:
+        return "u GYATT to make more 🗿";
       case count >= -50:
-        return "Sigma Grindset";
+        return "approved for the tik tok rizz party";
       default:
         return "Sigma Grindset";
     }
