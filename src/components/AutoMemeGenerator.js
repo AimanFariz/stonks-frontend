@@ -1,152 +1,193 @@
-import React, { useState } from "react";
-import { Line} from 'rc-progress';
-
-
+import React, { useState, useRef } from "react";
+import {Typewriter} from "react-simple-typewriter"
+import {Line } from "rc-progress";
+import { toPng } from 'html-to-image';
 const AutoMemeGenerator = () => {
   const [input, setInput] = useState("");
   const [memeCount, setMemeCount] = useState(0);
   const [generatedMeme, setGeneratedMeme] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state
 
-  // Fetch memes from Google Drive with the keyword in the name
+  const memeRef = useRef(null);
+
+  const handleExport = () => {
+    if (memeRef.current) {
+      toPng(memeRef.current)
+        .then((dataUrl) => {
+          const link = document.createElement('a');
+          link.download = 'meme.png';
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error) => console.error('Error exporting meme:', error));
+    }
+  };
+
   const fetchMemesFromDrive = async (keywords) => {
-    const folderId = "1y6vnmGJirAOOlyv_2b3rgy-5nW95DPT4"; // Replace with your folder ID
-    const apiKey = "AIzaSyDdy9EebzUeZYBt6ERb_m_3vo0d9bFqHPs"; // Replace with your API key
-
+    const folderId = "1y6vnmGJirAOOlyv_2b3rgy-5nW95DPT4" || "1HA9w4OwQvbPb_-RgcfNRwp0WbpzbSah0";
+    const apiKey = "AIzaSyDdy9EebzUeZYBt6ERb_m_3vo0d9bFqHPs";
     let allFiles = [];
+    setLoading(true); // Start loading
 
-    // For each word in the keywords array, search Google Drive for matching files
     for (let keyword of keywords) {
       const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+name+contains+'${keyword}'&key=${apiKey}&fields=files(id,name,mimeType)`;
+      
       const response = await fetch(url);
       const data = await response.json();
 
-      // Filter out non-image files
-      const imageFiles = data.files.filter(file => file.mimeType.startsWith("image/"));
+      const imageFiles = data.files.filter((file) => file.mimeType.startsWith("image/"));
       allFiles = [...allFiles, ...imageFiles];
     }
 
     if (allFiles.length > 0) {
-      // Randomly select a meme from the collected files
       const randomImage = allFiles[Math.floor(Math.random() * allFiles.length)];
-      // Use the file ID to construct the direct URL
-      // const imageUrl = `http://localhost:4000/proxy-image?id=${randomImage.id}`;
-    //   const imageUrl = `https://stonks-backend-sandy.vercel.app/api/proxy-image?id=${randomImage.id}`;
       const imageUrl = `https://stonks-backend-sandy.vercel.app/api/proxy-image?id=${randomImage.id}&t=${new Date().getTime()}`;
+      const caption = `When "${keywords.join(", ")}" happens...`;
 
-      console.log(imageUrl)
-      const caption = `When "${keywords.join(', ')}" happens...`;
-
-      // Set meme from Google Drive
       setGeneratedMeme({
         url: imageUrl,
         text: caption,
-        source: "drive", // Indicate source is from Google Drive
+        source: "drive",
       });
     } else {
       console.log("No matching image found.");
     }
-    setInput("")
+
+    setLoading(false); // End loading
+    setInput("");
   };
 
-  // Fetch memes from the external API (e.g., Imgflip)
-  // const fetchMemeFromAPI = async (keywords) => {
-  //   const response = await fetch("https://api.imgflip.com/get_memes");
-  //   const data = await response.json();
-    
-  //   // Filter memes based on keyword in the name
-  //   const filteredMemes = data.data.memes.filter(meme =>
-  //     keywords.some(keyword => meme.name.toLowerCase().includes(keyword.toLowerCase()))
-  //   );
-
-  //   if (filteredMemes.length > 0) {
-  //     const template = filteredMemes[Math.floor(Math.random() * filteredMemes.length)];
-  //     const caption = `When "${keywords.join(', ')}" happens...`;
-
-  //     // Set meme from API
-  //     setGeneratedMeme({
-  //       url: template.url,
-  //       text: caption,
-  //       source: "api", // Indicate source is from Imgflip API
-  //     });
-  //   } else {
-  //     console.log("No matching memes found.");
-  //   }
-  // };
-
-  // Combined function to fetch meme (either from Google Drive or API)
   const fetchMeme = async () => {
-    const inputWords = input.trim().split(/\s+/); // Split input into words based on whitespace
+    const inputWords = input.trim().split(/\s+/);
     if (inputWords.length === 0) {
       alert("Please enter a valid keyword");
       return;
+    } else {
+      alert(`${memeCount - 1} iq points`);
     }
 
-    // Call both functions with the list of keywords (words from the input)
-    // if (Math.random() > 0.5) { // Randomly decide which source to fetch from
-    //   fetchMemeFromAPI(inputWords);
-    // } else {
-    //   fetchMemesFromDrive(inputWords);
-    // }
-    fetchMemesFromDrive(inputWords)
-    setMemeCount(memeCount + 1); // Always increase the meter regardless of the input
+    fetchMemesFromDrive(inputWords);
+    setMemeCount(memeCount - 1);
   };
 
   const getBrainrotLabel = (count) => {
     switch (true) {
-      case count <= 5:
-        return "noob peasant";
-      case count <= 10:
-        return "Bussin' content. u GYATT to make more!";
-      case count <= 15:
-        return "Blud thinks he's Carti";
-      case count <= 20:
-        return "Chat is this real? Bro is COOKED";
-      case count <= 25:
+      case count >= -5:
+        return "Baby gronk";
+      case count >= -10:
+        return "I ain't tryna glaze, but ur COOKING";
+      case count >= -15:
+        return "Bro thinks he's Carti";
+      case count >= -20:
+        return "Certified Yapper";
+      case count >= -25:
         return "If u produced this much, just put the fries in the bag lil bro 😭";
-      case count <= 30:
-        return "Memes are Life";
-      case count <= 35:
-        return "Meme Fiend";
-      case count <= 40:
-        return "The Memerati";
-      case count <= 450:
-        return "Skibidi memer";
+      case count >= -50:
+        return "Sigma Grindset";
       default:
-        return "The Rizzler type shi";
+        return "Sigma Grindset";
     }
   };
 
+
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold ">Meme Out Your Way</h1>
-      <p>Whatever situation you are in, there's always a meme for that.</p>
+    <div className="px-5 pt-20 overflow-auto h-screen flex-grow bg-gradient-to-r from-slate-700 via-gray-900 to-slate-700 text-white flex flex-col">
+
+      <div className="py-5">
+      <h1 className="text-xl font-bold text-yellow-300" style={{fontFamily:"monospace"}}>Find Your Meme</h1>
+      <span className="text-white">
+      <Typewriter
+         words = {[
+          "Crashing out over your classes? ",
+          "Tired of hearing your boss yap? ",
+          "Mind went blank while flirting? ",
+          "Need a meme break in between shifts? ",
+          "Can't handle that group project anymore? ",
+          "Your sports team loses (again)? ",
+          "Have trouble sleeping? ",
+          "Just got roasted by your friend again? ",
+          "Trying to adult but everything’s a mess? ",
+          "Just got dumped by the love of your life? "
+        ]}
+        loop={false}
+        // cursor
+        // cursorStyle='|'
+        typeSpeed={20}
+        deleteSpeed={40}
+        delaySpeed={2000}
+        />
+        There will always be a meme for that.
+      </span>
+      </div>
+      
+      <div className="w-3/4 flex flex-col" style={{margin:'0 auto'}}>
       <input
         type="text"
         placeholder="What's the situation?"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        className="border rounded p-2 w-full"
+        className="border rounded p-2 w-full text-gray-500"
       />
       <button
         onClick={fetchMeme}
-        className="bg-purple-600 text-white rounded p-2 mt-2"
+        className="bg-purple-600 text-white rounded p-3 mt-2"
+        disabled={loading} // Disable button while loading
       >
-        Generate Meme
+        {loading ? "Loading..." : "Generate Meme"}
       </button>
-      {generatedMeme && (
-        <div className="mt-4 flex justify-center flex-col border border-red-600">
-          <img src={generatedMeme.url} alt="Generated Meme" className="m-auto" height={200} width={500} onError={() => console.log("Failed to load image")}/>
-          <p className="text-center mt-2 font-bold">{generatedMeme.text}</p>
-          <p className="text-center text-sm">Source: {generatedMeme.source === "drive" ? "Yo mama" : "some random public APIs"}</p>
+      </div>
+      
+
+      {loading && (
+        <div className="flex justify-center mt-4">
+          {/* Spinner or Animation */}
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-cyan-400"></div>
         </div>
       )}
-      <div className="text-center mt-4">
-        <p className="text-lg font-semibold">Brainrot Meter: {memeCount}</p>
-        <Line percent={memeCount} strokeWidth={1} strokeColor="#D3D3D3" />
-        <p className="text-sm text-gray-600">
-          Status: {getBrainrotLabel(memeCount)}
+
+      {generatedMeme && !loading && (
+        <div className="mt-4 flex justify-center flex-col border border-cyan-600">
+          <img
+            src={generatedMeme.url}
+            alt="Generated Meme"
+            className="m-auto object-cover"
+            height={200}
+            width={300}
+            onError={() => console.log("Failed to load image")}
+          />
+          {/* <p className="text-center mt-2 font-bold">{generatedMeme.text}</p>
+          <p className="text-center text-sm">
+            Source: {generatedMeme.source === "drive" ? "Yo mama's hard drive" : "some random public APIs"}
+          </p> */}
+        </div>
+      )}
+
+      <div>
+        <p className="text-lg p-5 font-semibold text-white">IQ Points: {memeCount}</p>
+        <div style={{ width: "300px", margin: "0 auto" }}>
+        <Line percent={Math.abs(memeCount)} strokeWidth={1} strokeColor="#3b82f6"
+          style={{
+            transform: "rotateY(180deg)",
+            animation: "ease-in-out"
+          }}/>
+          <p className="text-cyan-400 p-3">
+          <span className="text-white">Level:</span> {getBrainrotLabel(memeCount)}
         </p>
+        </div>
+        {generatedMeme?<button
+            className="bg-green-600 text-white px-4 py-2 mt-4"
+            onClick={handleExport}
+        >
+            Export Meme
+        </button>:null}
+        
       </div>
+      <footer className="p-20 flex flex-col justify-end items-center h-full">
+        <p className="">Empowering 𝓯𝓻𝓮𝓪𝓴𝔂𝓷𝓮𝓼𝓼 👅 on <span className='font-mono'>teh interwebz</span>, one brainrot at a time.</p>
+        <p>Made during a very chilly and lonely school break in 2024 by <a target="_blank" href='https://www.instagram.com/aimanfz05/' className='underline'>The Rizzler himself</a></p>
+      </footer>
+<p className="italic text-xs py-2">Disclaimer: The purpose of this website is to spread positivity and for fun. If you find any memes offensive, it ain't my problem that you're soft. just suck it up, say womp womp, and move on.</p>
+
     </div>
   );
 };
