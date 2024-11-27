@@ -2,12 +2,28 @@ import React, { useState, useRef } from "react";
 import {Typewriter} from "react-simple-typewriter"
 import {Line } from "rc-progress";
 import { toPng } from 'html-to-image';
+
 const AutoMemeGenerator = () => {
   const [input, setInput] = useState("");
   const [memeCount, setMemeCount] = useState(0);
   const [generatedMeme, setGeneratedMeme] = useState(null);
   const [loading, setLoading] = useState(false); // Loading state
-
+  const audios = [
+    "../audios/Anime.mp3",
+    "../audios/Bruh.mp3",
+    "../audios/Cash.mp3",
+    "../audios/Cheer.mp3",
+    "../audios/MarioJump.mp3",
+    "../audios/MetalGear.mp3"
+  ];
+  const playRandomAudio = () => {
+    // Pick a random audio from the array
+    const randomAudio = audios[Math.floor(Math.random() * audios.length)];
+    // Create a new Audio object and play the selected audio
+    const audio = new Audio(randomAudio);
+    audio.volume = 0.5;
+    audio.play();
+  };
   const memeRef = useRef(null);
 
   const handleExport = () => {
@@ -15,7 +31,7 @@ const AutoMemeGenerator = () => {
       toPng(memeRef.current)
         .then((dataUrl) => {
           const link = document.createElement('a');
-          link.download = 'meme.png';
+          link.download = 'stonks-meme.png';
           link.href = dataUrl;
           link.click();
         })
@@ -31,7 +47,6 @@ const AutoMemeGenerator = () => {
 
     for (let keyword of keywords) {
       const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+name+contains+'${keyword}'&key=${apiKey}&fields=files(id,name,mimeType)`;
-      
       const response = await fetch(url);
       const data = await response.json();
 
@@ -59,7 +74,7 @@ const AutoMemeGenerator = () => {
   function showFlyingText(text) {
     const container = document.getElementById('flying-text-container');
     const flyingText = document.createElement('div');
-  
+
     // Set text content and styles
     flyingText.textContent = text;
     flyingText.style.position = 'absolute';
@@ -67,13 +82,13 @@ const AutoMemeGenerator = () => {
     flyingText.style.fontSize = `${Math.random() * 20 + 20}px`; // Random font size
     flyingText.style.fontWeight = 'bold';
     flyingText.style.zIndex = '1000';
-  
+
     // Random start position
     const startX = Math.random() * window.innerWidth;
     const startY = Math.random() * window.innerHeight;
     flyingText.style.left = `${startX}px`;
     flyingText.style.top = `${startY}px`;
-  
+
     // Append to container
     container.appendChild(flyingText);
   
@@ -108,6 +123,7 @@ const AutoMemeGenerator = () => {
 
     fetchMemesFromDrive(inputWords);
     setMemeCount(memeCount - 1);
+    playRandomAudio();
   };
 
   const getBrainrotLabel = (count) => {
@@ -214,13 +230,13 @@ const AutoMemeGenerator = () => {
           <span className="text-white">Level:</span> {getBrainrotLabel(memeCount)}
         </p>
         </div>
-        {generatedMeme?<button
+        {generatedMeme?
+        <button ref={memeRef}
             className="bg-green-600 text-white px-4 py-2 mt-4"
             onClick={handleExport}
         >
             Export Meme
         </button>:null}
-        
       </div>
       <footer className="p-20 flex flex-col justify-end items-center h-full">
         <p className="">Empowering 𝓯𝓻𝓮𝓪𝓴𝔂𝓷𝓮𝓼𝓼 👅 on <span className='font-mono'>teh interwebz</span>, one brainrot at a time.</p>
