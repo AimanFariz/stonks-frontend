@@ -2,19 +2,25 @@ import React, { useState, useRef } from "react";
 import {Typewriter} from "react-simple-typewriter"
 import {Line } from "rc-progress";
 import { toPng } from 'html-to-image';
+import { exportComponentAsPNG } from "react-component-export-image";
+import html2canvas from "html2canvas"; // Import html2canvas
 
 const AutoMemeGenerator = () => {
   const [input, setInput] = useState("");
   const [memeCount, setMemeCount] = useState(0);
   const [generatedMeme, setGeneratedMeme] = useState(null);
   const [loading, setLoading] = useState(false); // Loading state
+  const [isImageLoaded, setIsImageLoaded] = useState(false); // Track image loading status
+
   const audios = [
     "../audios/Anime.mp3",
     "../audios/Bruh.mp3",
     "../audios/Cash.mp3",
     "../audios/Cheer.mp3",
     "../audios/MarioJump.mp3",
-    "../audios/MetalGear.mp3"
+    "../audios/MetalGear.mp3",
+    "../audios/haiya.mp3",
+    "../audios/Don_Pollo_1.mp3"
   ];
   const playRandomAudio = () => {
     // Pick a random audio from the array
@@ -25,19 +31,31 @@ const AutoMemeGenerator = () => {
     audio.play();
   };
   const memeRef = useRef(null);
-
-  const handleExport = () => {
-    if (memeRef.current) {
-      toPng(memeRef.current)
-        .then((dataUrl) => {
-          const link = document.createElement('a');
-          link.download = 'stonks-meme.png';
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch((error) => console.error('Error exporting meme:', error));
-    }
+  const handleImageLoad = () => {
+    setIsImageLoaded(true); // Set the state when the image is loaded
   };
+  // const handleExport = () => {
+  //   if (memeRef.current) {
+  //     // Use html2canvas to capture the content of memeRef
+  //     // console.log(memeRef.current)
+  //     html2canvas(memeRef.current)
+  //       .then((canvas) => {
+  //         // Convert the canvas to an image URL
+  //         const dataUrl = canvas.toDataURL("image/png");
+
+  //         // Create an invisible link to trigger download
+  //         const link = document.createElement("a");
+  //         link.download = "stonks-meme.png";
+  //         link.href = dataUrl;
+  //         link.click();
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error exporting meme:", error);
+  //       });
+  //   } else {
+  //     console.error("Meme container not found!");
+  //   }
+  // };
 
   const fetchMemesFromDrive = async (keywords) => {
     const folderId = "1y6vnmGJirAOOlyv_2b3rgy-5nW95DPT4" || "1HA9w4OwQvbPb_-RgcfNRwp0WbpzbSah0";
@@ -60,6 +78,9 @@ const AutoMemeGenerator = () => {
       const caption = `When "${keywords.join(", ")}" happens...`;
 
       setGeneratedMeme({
+        // switch(url:){
+        // case for each language
+        // }
         url: imageUrl,
         text: caption,
         source: "drive",
@@ -186,6 +207,7 @@ const AutoMemeGenerator = () => {
         onChange={(e) => setInput(e.target.value)}
         className="border rounded p-2 w-full text-gray-500"
       />
+
       <button
         onClick={fetchMeme}
         className="bg-purple-600 text-white rounded p-3 mt-2"
@@ -194,7 +216,6 @@ const AutoMemeGenerator = () => {
         {loading ? "Loading..." : "Generate Meme"}
       </button>
       </div>
-      
 
       {loading && (
         <div className="flex justify-center mt-4">
@@ -204,21 +225,25 @@ const AutoMemeGenerator = () => {
       )}
 
       {generatedMeme && !loading && (
-        <div className="mt-4 flex justify-center flex-col border border-cyan-600">
+        <div
+        className="mt-4 flex justify-center flex-col border border-cyan-600"
+        >
           <img
             src={generatedMeme.url}
+            ref={memeRef}
             alt="Generated Meme"
             className="m-auto object-cover"
             height={200}
             width={300}
+            onLoad={handleImageLoad}
             onError={() => console.log("Failed to load image")}
           />
-          {/* <p className="text-center mt-2 font-bold">{generatedMeme.text}</p>
+        </div>
+      )}
+      {/* <p className="text-center mt-2 font-bold">{generatedMeme.text}</p>
           <p className="text-center text-sm">
             Source: {generatedMeme.source === "drive" ? "Yo mama's hard drive" : "some random public APIs"}
           </p> */}
-        </div>
-      )}
 
       <div id="flying-text-container">
         <p className="text-lg p-5 font-semibold text-white">IQ Points: {memeCount}</p>
@@ -233,12 +258,7 @@ const AutoMemeGenerator = () => {
         </p>
         </div>
         {generatedMeme?
-        <button ref={memeRef}
-            className="bg-green-600 text-white px-4 py-2 mt-4"
-            onClick={handleExport}
-        >
-            Export Meme
-        </button>:null}
+        <a className="bg-green-600 text-white px-4 py-2 mt-4" target="__blank" href="https://drive.google.com/file/d/1AjHca3ziekcFfpWYxETU6OET5U6CkYI1/view?usp=sharing">Export Meme</a>:null}
       </div>
       <footer className="p-20 flex flex-col justify-end items-center h-full">
         <p className="">Empowering 𝓯𝓻𝓮𝓪𝓴𝔂𝓷𝓮𝓼𝓼 👅 on <span className='font-mono'>teh interwebz</span>, one brainrot at a time.</p>
