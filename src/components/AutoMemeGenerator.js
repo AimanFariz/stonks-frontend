@@ -22,6 +22,19 @@ const AutoMemeGenerator = () => {
     "../audios/haiya.mp3",
     "../audios/Don_Pollo_1.mp3"
   ];
+  const images = [
+    "../image/don-arrow.jpg",
+    "../image/don-asi-no.jpg",
+    "../image/don-call.jpg",
+    "../image/don-calll.jpg",
+    "../image/don-crown.jpg",
+    "../image/don-eyes.jpg",
+    "../image/don-stretch.webp",
+    "../image/kai-tweak.jpg",
+    "../image/speed-huh.jpg",
+
+  ]
+
   const playRandomAudio = () => {
     // Pick a random audio from the array
     const randomAudio = audios[Math.floor(Math.random() * audios.length)];
@@ -74,7 +87,7 @@ const AutoMemeGenerator = () => {
 
     if (allFiles.length > 0) {
       const randomImage = allFiles[Math.floor(Math.random() * allFiles.length)];
-      const imageUrl = `https://stonks-backend-sandy.vercel.app/api/proxy-image?id=${randomImage.id}&t=${new Date().getTime()}`;
+      const imageUrl = `https://stonks-back.vercel.app/api/proxy-image?id=${randomImage.id}&t=${new Date().getTime()}`;
       const caption = `When "${keywords.join(", ")}" happens...`;
 
       setGeneratedMeme({
@@ -131,15 +144,54 @@ const AutoMemeGenerator = () => {
       container.removeChild(flyingText);
     }, animationDuration);
   }
-  
+  function showFlyingImage(imageUrl) {
+    const container = document.getElementById('flying-text-container'); 
+    const flyingImage = document.createElement('img');
+
+    // Set image source and styles
+    flyingImage.src = imageUrl;
+    flyingImage.style.position = 'absolute';
+    flyingImage.style.width = `${Math.random() * 100 + 100}px`; // Random width between 50px and 150px
+    flyingImage.style.zIndex = '1000';
+
+    // Random start position
+    const startX = Math.random() * window.innerWidth;
+    const startY = Math.random() * window.innerHeight;
+    flyingImage.style.left = `${startX}px`;
+    flyingImage.style.top = `${startY}px`;
+
+    // Append to container
+    container.appendChild(flyingImage);
+
+    // Animate the image
+    const animationDuration = 1500; // 1.5 seconds
+    flyingImage.animate(
+        [
+            { transform: 'translateY(0)', opacity: 1 },
+            { transform: 'translateY(-100px)', opacity: 0 },
+        ],
+        {
+            duration: animationDuration,
+            easing: 'ease-out',
+        }
+    );
+
+    // Remove image after animation
+    setTimeout(() => {
+        container.removeChild(flyingImage);
+    }, animationDuration);
+}
+
   const fetchMeme = async () => {
     const inputWords = input.trim().split(/\s+/);
     if (inputWords.length === 0) {
       alert("Please enter a valid keyword");
       return;
     } else {
-      // alert(`${memeCount - 1} iq points`);
+      // alert(`${memeCount - 1} iq points`); this shi annoying af for the UX, so I took it out lol
       showFlyingText(`${memeCount - 1} iq points`)
+      const randomImg = images[Math.floor(Math.random() * images.length)];
+      showFlyingImage(randomImg);
     }
 
     fetchMemesFromDrive(inputWords);
